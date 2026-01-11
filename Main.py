@@ -6,7 +6,12 @@ import os
 import threading
 import random
 import string
-import CodemaoEDUTools
+try:
+    import CodemaoEDUTools
+except ImportError:
+    logging.error("请执行以下命令安装CodemaoEDUTools：")
+    logging.info("pip install CodemaoEDUTools")
+    os._exit(1)
 
 logging.basicConfig(level=logging.INFO)
 coloredlogs.install(level="INFO", fmt="%(asctime)s - %(funcName)s: %(message)s")
