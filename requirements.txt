@@ -1,3 +1,4 @@
-coloredlogs
-requests
-CodemaoEDUTools
+codemaoedutools==2.0.0
+coloredlogs==15.0.1
+fake_useragent==2.2.0
+requests==2.32.5
