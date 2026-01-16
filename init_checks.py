@@ -2,16 +2,12 @@
 import os
 import sys
 import logging
-import coloredlogs
-
-logging.basicConfig(level=logging.INFO)
-coloredlogs.install(level="INFO", fmt="%(asctime)s - %(funcName)s: %(message)s")
 
 def check_python_version():
     """检查Python版本"""
     major, minor = sys.version_info[:2]
-    if major != 3 or minor < 6:
-        logging.error(f"Python版本必须为3.6及以上，当前版本为{major}.{minor}")
+    if major != 3 or minor < 9:
+        logging.error(f"Python版本必须为3.9及以上，当前版本为{major}.{minor}")
         return False
     return True
 
