@@ -37,7 +37,7 @@
             "name": "批量举报帖子"
         },
         "8": {
-            "name": "添加自己的token到tokens文件"
+            "name": "添加指定用户的token到tokens文件"
         },
         "退出登录": {
             "name": "退出登录"

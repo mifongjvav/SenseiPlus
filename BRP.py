@@ -6,6 +6,7 @@ import datetime
 import pickle
 import os
 import json
+import getpass
 
 logging.basicConfig(level=logging.INFO)
 coloredlogs.install(level="INFO", fmt="%(asctime)s - %(funcName)s: %(message)s")
@@ -114,7 +115,7 @@ else:
     logging.info("请输入您的用户名/手机号")
     identity = input()
     logging.info("请输入您的密码")
-    password = input()
+    password = getpass.getpass()
     try:
         login_response = requests.post(
             url="https://api.codemao.cn/tiger/v3/web/accounts/login",

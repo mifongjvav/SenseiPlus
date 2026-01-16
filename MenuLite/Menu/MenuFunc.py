@@ -1,6 +1,6 @@
 from MenuLite.Menu.Func import Func
 
-__all__ = ['举报所有作品', '点赞所有作品', '收藏所有作品', '评论所有作品', '浏览所有作品', '生成学生列表', '批量举报帖子', '添加自己的token到tokens文件']
+__all__ = ['举报所有作品', '点赞所有作品', '收藏所有作品', '评论所有作品', '浏览所有作品', '生成学生列表', '批量举报帖子', '添加指定用户的token到tokens文件']
 
 def 举报所有作品():
     Func.ReportAllWorks()
@@ -23,8 +23,8 @@ def 生成学生列表():
 def 批量举报帖子():
     Func.BRP()
 
-def 添加自己的token到tokens文件():
-    Func.AddIToken()
+def 添加指定用户的token到tokens文件():
+    Func.AddToken()
 
 def 退出登录():
     Func.Logout()

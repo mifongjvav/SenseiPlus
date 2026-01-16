@@ -7,6 +7,7 @@ import random
 import string
 import shared_data
 import sys
+import getpass
 from fake_useragent import UserAgent
 from init_checks import perform_all_checks
 from MenuLite.MlMain import set_condition_var
@@ -84,7 +85,7 @@ else:
     logging.info("请输入您的用户名/手机号")
     identity = input()
     logging.info("请输入您的密码")
-    password = input()
+    password = getpass.getpass()
     try:
         login_response = requests.post(
             url="https://api.codemao.cn/tiger/v3/web/accounts/login",

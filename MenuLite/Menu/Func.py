@@ -69,7 +69,7 @@ class Func:
     def BRP():
         os.system("python BRP.py")
 
-    def AddIToken():
+    def AddToken():
         logging.info("输入用户名/手机号")
         Username = input()
         logging.info("输入密码，不会显示")
