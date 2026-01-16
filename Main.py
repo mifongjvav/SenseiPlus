@@ -14,12 +14,6 @@ from MenuLite.MlMain import set_condition_var
 
 # 配置全局 logging
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "latest.log")
-try:
-    import CodemaoEDUTools
-except ImportError:
-    logging.error("请执行以下命令安装CodemaoEDUTools：")
-    logging.info("pip install CodemaoEDUTools")
-    os._exit(1)
 
 # 删除脚本所在目录下的latest.log文件，不会误删除
 try:
