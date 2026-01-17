@@ -8,6 +8,7 @@ import string
 import shared_data
 import sys
 import getpass
+import time
 from fake_useragent import UserAgent
 from init_checks import perform_all_checks
 from MenuLite.MlMain import set_condition_var
@@ -121,6 +122,39 @@ else:
     with open("login.json", "w", encoding="utf-8") as f:
         f.write(login_response.text)
 logging.info(f"欢迎回家，sensei {login_user_name}")
+
+# 记录登录时间的文件路径
+LOGIN_TIME_FILE = "logintime.json"
+
+# 获取当前时间戳
+current_time = time.time()
+
+# 如果存在 logintime.json 文件
+if os.path.exists(LOGIN_TIME_FILE):
+    try:
+        with open(LOGIN_TIME_FILE, "r", encoding="utf-8") as f:
+            login_time_data = json.load(f)
+            
+        # 检查是否有 logintime 键
+        if "logintime" in login_time_data:
+            last_login_time = login_time_data["logintime"]
+            time_diff_hours = (current_time - last_login_time) / 3600
+            
+            # 如果时间差大于72小时
+            if time_diff_hours > 72:
+                logging.warning("为防止用户信息更改，SenseiPlus推荐你每72小时重新登录一次")
+    except (json.JSONDecodeError, KeyError) as e:
+        logging.debug(f"logintime.json 文件读取错误: {e}")
+        # 文件损坏，创建新的
+        pass
+
+# 无论是否存在文件，都更新当前登录时间
+try:
+    with open(LOGIN_TIME_FILE, "w", encoding="utf-8") as f:
+        json.dump({"logintime": current_time}, f)
+except Exception as e:
+    logging.debug(f"写入登录时间失败: {e}")
+
 
 logging.info("请输入对方的用户ID，输入0退出，输入1使用受限模式:")
 user_id = input()
