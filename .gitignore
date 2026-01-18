@@ -1,5 +1,8 @@
 tokens.txt
 login.json
+logintime.json
+build_info.json
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

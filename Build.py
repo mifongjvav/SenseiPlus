@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 
 owner = "mifongjvav"
 repo = "SenseiPlus"
-version = "2.0.0"
+version = "2.2.0"
 
 def get_latest_commit_sha(owner, repo, short=True, branch=None):
     if branch:

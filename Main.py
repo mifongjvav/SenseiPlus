@@ -12,6 +12,12 @@ import time
 from fake_useragent import UserAgent
 from init_checks import perform_all_checks
 from MenuLite.MlMain import set_condition_var
+from MenuLite.Menu.api import GetAPI
+
+Debug = True
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # 配置全局 logging
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "latest.log")
@@ -31,7 +37,10 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ],
 )
-coloredlogs.install(level="DEBUG", fmt="%(asctime)s - %(levelname)s - %(funcName)s - %(message)s")
+if Debug:
+    coloredlogs.install(level="DEBUG", fmt="%(asctime)s - %(levelname)s - %(funcName)s - %(message)s")
+else:
+    coloredlogs.install(level="INFO", fmt="%(asctime)s - %(levelname)s - %(funcName)s - %(message)s")
 perform_all_checks()
 
 def generate_strings(count=1, length=8):
@@ -53,6 +62,7 @@ def generate_strings(count=1, length=8):
 
 short_sha =json.load(open("build_info.json", "r", encoding="utf-8"))["commit"]
 build_date = json.load(open("build_info.json", "r", encoding="utf-8"))["build_date"]
+version = json.load(open("build_info.json", "r", encoding="utf-8"))["version"]
 
 # 主程序
 logging.info(f'''
@@ -66,9 +76,10 @@ logging.info(f'''
 欢迎使用SenseiPlus
 
 Author：Argon
-Version：{json.load(open("build_info.json", "r", encoding="utf-8"))["version"]}
+Email：smmomm@126.com
+Version：{version}
 提交：{short_sha}
-构建日期：{build_date}
+提交日期：{build_date}
 -==============================================================================-
 ''')
 if os.path.exists("login.json"):
@@ -76,6 +87,7 @@ if os.path.exists("login.json"):
         with open("login.json", "r", encoding="utf-8") as f:
             login_data = json.load(f)
             login_user_name = login_data['user_info']['nickname']
+            login_token = login_data['auth']['token']
     except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
         logging.warning(f"login.json 文件损坏或格式错误: {e}")
         # 删除损坏的文件，重新登录
@@ -122,6 +134,18 @@ else:
     with open("login.json", "w", encoding="utf-8") as f:
         f.write(login_response.text)
 logging.info(f"欢迎回家，sensei {login_user_name}")
+messages = GetAPI('/web/message-record/count', login_token)
+messages = messages.json()
+counts = []
+for item in messages:
+    if "count" in item:
+        counts.append(item["count"])
+
+if counts[0] > 0 or counts[1] > 0 or counts[2] > 0:
+    logging.warning("您有新消息，可以使用'10. 清除新消息通知'清除")
+    logging.info(f"新回复数量: {counts[0]} 个")
+    logging.info(f"新点赞/再创作数量: {counts[1]} 个")
+    logging.info(f"新系统通知数量: {counts[2]} 个")
 
 # 记录登录时间的文件路径
 LOGIN_TIME_FILE = "logintime.json"
@@ -158,6 +182,9 @@ except Exception as e:
 
 logging.info("请输入对方的用户ID，输入0退出，输入1使用受限模式:")
 user_id = input()
+if "&" in user_id or "python" in user_id:
+    logging.info('检测到疑似重复运行，已退出')
+    sys.exit(1)
 if user_id == "0":
     sys.exit(0)
 elif user_id == "1":

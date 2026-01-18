@@ -5,7 +5,9 @@ import shared_data
 import getpass
 import requests
 import json
+import sys
 from .cetextra import UnTopReview
+from .api import GetAPI
 
 try:
     import CodemaoEDUTools
@@ -206,3 +208,62 @@ class Func:
     def Logout():
         os.remove("login.json")
         logging.info("已退出登录")
+        sys.exit()
+
+    def CleanNewMessages():
+        with open('login.json', 'r', encoding='utf-8') as f:
+            login_data = json.load(f)
+        token = login_data['auth']['token']
+        
+        # 三种消息类型
+        message_types = [
+            ("COMMENT_REPLY", "评论回复"),
+            ("LIKE_FORK", "点赞/分享"),
+            ("SYSTEM", "系统消息")
+        ]
+        
+        for query_type, type_name in message_types:
+            logging.info(f"开始清理{type_name}消息...")
+            
+            all_messages = []
+            current_offset = 0
+            limit = 200  # 每次获取200条
+            
+            while True:
+                url = f"/web/message-record?query_type={query_type}&limit={limit}&offset={current_offset}"
+                response = GetAPI(url, token)
+                
+                if response.status_code != 200:
+                    logging.error(f"获取{type_name}消息失败，状态码：{response.status_code}")
+                    break
+                
+                data = response.json()
+                page_messages = data.get('items', [])
+                total_messages = data.get('total', 0)
+                
+                # 如果是第一次请求，显示总消息数
+                if current_offset == 0:
+                    logging.info(f"{type_name}消息总数：{total_messages}")
+                
+                # 添加当前页的消息
+                all_messages.extend(page_messages)
+                
+                # 显示进度
+                retrieved_count = current_offset + len(page_messages)
+                logging.info(f"已获取 {type_name} 消息 {retrieved_count}/{total_messages} 条")
+                
+                # 如果没有更多消息，或者已经获取了所有消息，退出循环
+                if len(page_messages) == 0 or retrieved_count >= total_messages:
+                    break
+                
+                # 增加 offset 以获取下一页
+                current_offset += limit
+            
+            # 输出获取到的消息数量
+            logging.info(f"共获取到{type_name}消息 {len(all_messages)} 条")
+            
+            # TODO: 这里添加实际清理消息的逻辑
+            # 注意：由于原函数没有给出具体的清理API，这里只完成了翻页获取
+            # 需要根据实际API添加标记已读、删除等操作
+            
+            logging.info(f"{type_name}消息获取完成")

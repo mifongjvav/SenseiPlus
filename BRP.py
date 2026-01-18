@@ -7,6 +7,7 @@ import pickle
 import os
 import json
 import getpass
+from MenuLite.Menu.api import PostAPI
 
 logging.basicConfig(level=logging.INFO)
 coloredlogs.install(level="INFO", fmt="%(asctime)s - %(funcName)s: %(message)s")
@@ -75,20 +76,6 @@ class DailyReportLimiter:
             "limit": MAX_DAILY_TOTAL_REPORTS,
             "remaining": self.get_remaining()
         }
-
-def PostAPI(Path: str, PostData: dict, Token: str) -> requests.Response:
-    headers = {
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "zh-CN,zh;q=0.9",
-        "Connection": "keep-alive",
-        "Content-Type": "application/json",
-        "User-Agent": UserAgent().random,
-        "authorization": Token,
-    }
-    return requests.post(
-        url=f"https://api.codemao.cn{Path}", headers=headers, json=PostData
-    )
 
 # 初始化每日限制器
 daily_limiter = DailyReportLimiter()
