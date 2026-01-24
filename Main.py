@@ -125,6 +125,7 @@ else:
     try:
         login_user_id = login_response.json()['user_info']['id']
         login_user_name = login_response.json()['user_info']['nickname']
+        login_token = login_response.json()['auth']['token']
     except KeyError:
         logging.error("登录响应中没有找到用户信息")
         exit(1)

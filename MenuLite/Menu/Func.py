@@ -8,6 +8,19 @@ import json
 import sys
 from .cetextra import UnTopReview
 from .api import GetAPI
+from fake_useragent import UserAgent
+def PutAPI(Path: str, Token: str, json_data: dict = None) -> requests.Response:
+    """PUT方式调用API"""
+    headers = {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "zh-CN,zh;q=0.9",
+        "Connection": "keep-alive",
+        "Content-Type": "application/json",
+        "User-Agent": UserAgent().random,
+        "authorization": Token,
+    }
+    return requests.put(url=f"https://api-creation.codemao.cn{Path}", headers=headers, json=json_data)
 
 try:
     import CodemaoEDUTools
@@ -267,3 +280,27 @@ class Func:
             # 需要根据实际API添加标记已读、删除等操作
             
             logging.info(f"{type_name}消息获取完成")
+    def PublishCustomCoCoWork():
+        with open('login.json', 'r', encoding='utf-8') as f:
+            login_data = json.load(f)
+        token = login_data['auth']['token']
+        logging.info("请输入作品ID")
+        work_id = input()
+        logging.info("请输入自定义url")
+        custom_url = input()
+        logging.info("请输入作品名称")
+        name = input()
+        logging.info("请输入作品描述")
+        description = input()
+        logging.info("请输入操作说明")
+        operation = input()
+        json_data = {
+    "name": name,
+    "description": description,
+    "operation": operation,
+    "cover_url": "https://creation.bcmcdn.com/716/appcraft/IMAGE_Ujly7Ixj4_1769251346032",
+    "bcmc_url": "https://creation.bcmcdn.com/716/appcraft/JSON_b8Q6O3S5m_1769251346363.json",
+    "player_url": custom_url
+}
+        response = PutAPI(f"/coconut/web/work/{work_id}/publish", token, json_data)
+        logging.info(f"发布作品 {work_id} 为自定义URL {custom_url} 响应状态码：{response.status_code}")
