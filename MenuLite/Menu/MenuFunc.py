@@ -1,4 +1,5 @@
 from MenuLite.Menu.Func import Func
+import os
 
 __all__ = ['举报所有作品', '点赞所有作品', '收藏所有作品', '评论所有作品', '浏览所有作品', '生成学生列表', '批量举报帖子', '添加指定用户的token到tokens文件', '搜索指定作品的评论并置顶or取消置顶', '清除新消息通知', '发布自定义url的CoCo作品', '退出登录']
 
@@ -34,6 +35,9 @@ def 清除新消息通知():
 
 def 发布自定义url的CoCo作品():
     Func.PublishCustomCoCoWork()
+
+def 更新():
+    os.system('python updater.py')
 
 def 退出登录():
     Func.Logout()
