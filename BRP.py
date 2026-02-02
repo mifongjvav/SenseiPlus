@@ -92,6 +92,7 @@ if os.path.exists("login.json"):
         with open("login.json", "r", encoding="utf-8") as f:
             login_data = json.load(f)
             login_user_name = login_data['user_info']['nickname']
+            login_user_id = login_data['user_info']['id']
     except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
         logging.warning(f"login.json 文件损坏或格式错误: {e}")
         # 删除损坏的文件，重新登录
