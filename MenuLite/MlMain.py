@@ -2,6 +2,8 @@ import logging
 import json
 import os
 import shared_data
+import sys
+import subprocess
 from MenuLite.Menu.MenuFunc import *  # noqa: F403
 
 # 获取当前脚本所在目录
@@ -41,6 +43,7 @@ def ml_main_menu():
             logging.info(f"{key}. {item_name}")
     
     logging.info("x. 退出")
+    logging.info("re. 重启")
 
 def ml_input():
     while True:
@@ -52,6 +55,9 @@ def ml_input():
             if user_input == 'x':
                 logging.info("退出程序")
                 os._exit(0)
+            elif user_input == 're':
+                subprocess.run([sys.executable] + sys.argv + ["--restart"])
+                sys.exit(0)
             
             # 检查输入的键是否存在于menu_items中
             if user_input in menu_items:

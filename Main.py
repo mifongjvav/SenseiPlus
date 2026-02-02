@@ -9,6 +9,7 @@ import shared_data
 import sys
 import getpass
 import time
+import subprocess
 from fake_useragent import UserAgent
 from init_checks import perform_all_checks
 from MenuLite.MlMain import set_condition_var
@@ -22,11 +23,20 @@ if hasattr(sys.stdout, "reconfigure"):
 # 配置全局 logging
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "latest.log")
 
+log_file = os.path.join(os.path.dirname(__file__), "latest.log")
+    
+    # 如果有现有的日志处理器，先关闭它们
+for handler in logging.root.handlers[:]:
+    handler.close()
+    logging.root.removeHandler(handler)
+
 # 删除脚本所在目录下的latest.log文件，不会误删除
 try:
     os.remove(os.path.join(os.path.dirname(__file__), "latest.log"))
 except FileNotFoundError:
     pass
+except PermissionError:
+    restaeted = True
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -82,6 +92,8 @@ Version：{version}
 提交日期：{build_date}
 -==============================================================================-
 ''')
+if 'restart' in sys.argv or '--restart' in sys.argv:
+    logging.warning("你似乎执行了重启操作，为保证工作继续，日志没有删除（其实是因为权限问题awa）")
 if os.path.exists("login.json"):
     try:
         with open("login.json", "r", encoding="utf-8") as f:
@@ -134,7 +146,7 @@ else:
     # 将用户登录信息写入login.json
     with open("login.json", "w", encoding="utf-8") as f:
         f.write(login_response.text)
-logging.info(f"欢迎回家，sensei {login_user_name}")
+logging.info(f"欢迎回家，{login_user_name}")
 messages = GetAPI('/web/message-record/count', login_token)
 messages = messages.json()
 counts = []
@@ -182,10 +194,16 @@ except Exception as e:
 
 
 logging.info("请输入对方的用户ID，输入0退出，输入1使用受限模式:")
-user_id = input()
+try:
+    user_id = input()
+except KeyboardInterrupt:
+    logging.info("检测到疑似重复运行，正在重启")
+    subprocess.run([sys.executable] + sys.argv + ["--restart"])
+    sys.exit(0)
 if "&" in user_id or "python" in user_id:
-    logging.info('检测到疑似重复运行，已退出')
-    sys.exit(1)
+    logging.info('检测到疑似重复运行，正在重启')
+    subprocess.run([sys.executable] + sys.argv + ["--restart"])
+    sys.exit(0)
 if user_id == "0":
     sys.exit(0)
 elif user_id == "1":

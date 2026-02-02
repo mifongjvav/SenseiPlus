@@ -6,8 +6,9 @@ import getpass
 import requests
 import json
 import sys
+import time
 from .cetextra import UnTopReview
-from .api import GetAPI
+from .api import GetAPI, PostAPI
 from fake_useragent import UserAgent
 def PutAPI(Path: str, Token: str, json_data: dict = None) -> requests.Response:
     """PUT方式调用API"""
@@ -275,10 +276,6 @@ class Func:
             # 输出获取到的消息数量
             logging.info(f"共获取到{type_name}消息 {len(all_messages)} 条")
             
-            # TODO: 这里添加实际清理消息的逻辑
-            # 注意：由于原函数没有给出具体的清理API，这里只完成了翻页获取
-            # 需要根据实际API添加标记已读、删除等操作
-            
             logging.info(f"{type_name}消息获取完成")
     def PublishCustomCoCoWork():
         with open('login.json', 'r', encoding='utf-8') as f:
@@ -301,6 +298,42 @@ class Func:
     "cover_url": "https://creation.bcmcdn.com/716/appcraft/IMAGE_Ujly7Ixj4_1769251346032",
     "bcmc_url": "https://creation.bcmcdn.com/716/appcraft/JSON_b8Q6O3S5m_1769251346363.json",
     "player_url": custom_url
-}
+        }
         response = PutAPI(f"/coconut/web/work/{work_id}/publish", token, json_data)
         logging.info(f"发布作品 {work_id} 为自定义URL {custom_url} 响应状态码：{response.status_code}")
+
+    def CommentAndTop():
+        logging.info('输入评论内容')
+        comment_content = input()
+        comment_content = str(comment_content)
+        logging.info('输入作品ID')
+        work_id = input()
+        comment_data = {
+            "emoji_content": "",
+            "content": comment_content
+        }
+        with open('login.json', 'r', encoding='utf-8') as f:
+            login_data = json.load(f)
+            login_token = login_data['auth']['token']
+        response = PostAPI(f"/creation-tools/v1/works/{work_id}/comment", comment_data, login_token)
+        if response.status_code != 201:
+            if response.json()['error_message'] == '当前作品评论额度用完啦！看看其他作品吧~':
+                logging.error("评论失败，评论额度用完")
+                return
+        selected_id = response.json()['id']
+        time.sleep(1)  # 等待1秒以确保评论已发布
+        logging.info(f"正在置顶评论 {selected_id}...")
+        # 设置token为第一个token
+        with open('./tokens.txt', 'r', encoding='utf-8') as f:
+            tokens = f.readlines()
+            if tokens:
+                token = tokens[0].strip()
+            else:
+                logging.error("tokens.txt 中没有可用的token")
+                return
+        try:
+            # 假设CodemaoEDUTools中有置顶函数
+            CodemaoEDUTools.TopReview(token, work_id, selected_id)
+            logging.info(f"评论 {selected_id} 置顶成功！")
+        except Exception as e:
+            logging.error(f"置顶失败：{e}")
