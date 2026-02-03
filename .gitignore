@@ -1,6 +1,6 @@
 tokens.txt
 login.json
-logintime.json
+login_time.json
 build_info.json
 *.zip
 report_limit.pkl

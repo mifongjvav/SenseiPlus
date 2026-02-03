@@ -42,7 +42,7 @@ def PostWithoutTokenAPI(Path: str, PostData: dict) -> requests.Response:
 
 
 def PostEduAPI(Path: str, PostData: dict, Token: str) -> requests.Response:
-    """使用POST方式调用EDUAPI"""
+    """使用POST方式调用EDU API"""
     headers = {
         "Accept": "*/*",
         "Accept-Encoding": "gzip, deflate, br",

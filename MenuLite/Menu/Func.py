@@ -10,6 +10,23 @@ import time
 from .cetextra import UnTopReview
 from .api import GetAPI, PostAPI
 from fake_useragent import UserAgent
+def top_comment(selected_id, work_id):
+    logging.info(f"正在置顶评论 {selected_id}...")
+    # 设置token为第一个token
+    with open('./tokens.txt', 'r', encoding='utf-8') as f:
+        tokens = f.readlines()
+        if tokens:
+            token = tokens[0].strip()
+        else:
+            logging.error("tokens.txt 中没有可用的token")
+            return
+    try:
+        # 假设CodemaoEDUTools中有置顶函数
+        CodemaoEDUTools.TopReview(token, work_id, selected_id)
+        logging.info(f"评论 {selected_id} 置顶成功！")
+    except Exception as e:
+        logging.error(f"置顶失败：{e}")
+
 def PutAPI(Path: str, Token: str, json_data: dict = None) -> requests.Response:
     """PUT方式调用API"""
     headers = {
@@ -26,6 +43,7 @@ def PutAPI(Path: str, Token: str, json_data: dict = None) -> requests.Response:
 try:
     import CodemaoEDUTools
 except ImportError:
+    import CodemaoEDUTools
     logging.error("请执行以下命令安装CodemaoEDUTools：")
     logging.info("pip install CodemaoEDUTools")
     os._exit(1)
@@ -35,6 +53,7 @@ ids = shared_data.ids
 threads = []
 
 class Func:
+    @staticmethod
     def ReportAllWorks():
         logging.info("开始举报作品（多线程）")
         for work_id in ids:
@@ -45,6 +64,7 @@ class Func:
             threads.append(thread)
             thread.start()
 
+    @staticmethod
     def LikeAllWorks():
         logging.info("开始点赞作品（多线程）")
         for work_id in ids:
@@ -55,6 +75,7 @@ class Func:
             threads.append(thread)
             thread.start()
 
+    @staticmethod
     def CollectAllWorks():
         logging.info("开始收藏作品（多线程）")
         for work_id in ids:
@@ -65,6 +86,7 @@ class Func:
             threads.append(thread)
             thread.start()
 
+    @staticmethod
     def ReviewAllWorks():
         logging.info("开始评论作品（多线程）")
         for work_id in ids:
@@ -75,37 +97,42 @@ class Func:
             threads.append(thread)
             thread.start()
 
+    @staticmethod
     def ViewAllWorks():
         logging.info("开始浏览所有作品（多线程）")
         for work_id in ids:
             CodemaoEDUTools.ViewWork('./tokens.txt', work_id)
 
+    @staticmethod
     def GenerateStudentList():
         logging.info("生成学生列表")
         student_list = shared_data.generate_strings(count=100, length=8)
         logging.info(student_list)
 
+    @staticmethod
     def BRP():
         os.system("python BRP.py")
 
+    @staticmethod
     def AddToken():
         logging.info("输入用户名/手机号，输入0使用当前登录用户")
-        Username = input()
-        if Username == '0':
+        username = input()
+        if username == '0':
             with open('./login.json', 'r', encoding='utf-8') as f:
                 login_data = json.load(f)
-                Token = login_data['auth']['token']
+                token = login_data['auth']['token']
         else:
             logging.info("输入密码，不会显示")
-            Password = getpass.getpass()
-            Token = CodemaoEDUTools.GetUserToken(Username, Password)
-        if Token:
+            password = getpass.getpass()
+            token = CodemaoEDUTools.GetUserToken(username, password)
+        if token:
             with open('./tokens.txt', 'a', encoding='utf-8') as f:
-                f.write(Token + '\n')
-            logging.info(f"Token {Token} 已添加到tokens.txt")
+                f.write(token + '\n')
+            logging.info(f"token {token} 已添加到tokens.txt")
         else:
             logging.error("获取Token失败")
     
+    @staticmethod
     def SearchAndPinComment():
         logging.info("输入要搜索的作品ID")
         work_id = input()
@@ -203,27 +230,15 @@ class Func:
 
         else:
             # 执行置顶操作
-            logging.info(f"正在置顶评论 {selected_id}...")
-            # 设置token为第一个token
-            with open('./tokens.txt', 'r', encoding='utf-8') as f:
-                tokens = f.readlines()
-                if tokens:
-                    token = tokens[0].strip()
-                else:
-                    logging.error("tokens.txt 中没有可用的token")
-                    return
-            try:
-                # 假设CodemaoEDUTools中有置顶函数
-                CodemaoEDUTools.TopReview(token, work_id, selected_id)
-                logging.info(f"评论 {selected_id} 置顶成功！")
-            except Exception as e:
-                logging.error(f"置顶失败：{e}")
+            top_comment(selected_id, work_id)
 
+    @staticmethod
     def Logout():
         os.remove("login.json")
         logging.info("已退出登录")
         sys.exit()
 
+    @staticmethod
     def CleanNewMessages():
         with open('login.json', 'r', encoding='utf-8') as f:
             login_data = json.load(f)
@@ -277,7 +292,8 @@ class Func:
             logging.info(f"共获取到{type_name}消息 {len(all_messages)} 条")
             
             logging.info(f"{type_name}消息获取完成")
-    def PublishCustomCoCoWork():
+    @staticmethod
+    def     PublishCustomCoCoWork():
         with open('login.json', 'r', encoding='utf-8') as f:
             login_data = json.load(f)
         token = login_data['auth']['token']
@@ -302,6 +318,7 @@ class Func:
         response = PutAPI(f"/coconut/web/work/{work_id}/publish", token, json_data)
         logging.info(f"发布作品 {work_id} 为自定义URL {custom_url} 响应状态码：{response.status_code}")
 
+    @staticmethod
     def CommentAndTop():
         logging.info('输入评论内容')
         comment_content = input()
@@ -322,18 +339,4 @@ class Func:
                 return
         selected_id = response.json()['id']
         time.sleep(1)  # 等待1秒以确保评论已发布
-        logging.info(f"正在置顶评论 {selected_id}...")
-        # 设置token为第一个token
-        with open('./tokens.txt', 'r', encoding='utf-8') as f:
-            tokens = f.readlines()
-            if tokens:
-                token = tokens[0].strip()
-            else:
-                logging.error("tokens.txt 中没有可用的token")
-                return
-        try:
-            # 假设CodemaoEDUTools中有置顶函数
-            CodemaoEDUTools.TopReview(token, work_id, selected_id)
-            logging.info(f"评论 {selected_id} 置顶成功！")
-        except Exception as e:
-            logging.error(f"置顶失败：{e}")
+        top_comment(selected_id, work_id)

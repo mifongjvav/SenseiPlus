@@ -8,15 +8,15 @@ from Main import Debug
 def update():
     with zipfile.ZipFile(update_zip, 'r') as zf:
         root = zf.namelist()[0].split('/')[0] if zf.namelist() else ''
-        for f in zf.infolist():
-            if f.filename.startswith(root + '/'):
-                target = f.filename.replace(root + '/', '', 1)
-                if target and not f.is_dir():  # 跳过空路径和目录
+        for F in zf.infolist():
+            if F.filename.startswith(root + '/'):
+                target = F.filename.replace(root + '/', '', 1)
+                if target and not F.is_dir():  # 跳过空路径和目录
                     # 只在有父目录时才创建
                     if '/' in target:
                         os.makedirs(target[:target.rfind('/')], exist_ok=True)
                     with open(target, 'wb') as out:
-                        out.write(zf.read(f))
+                        out.write(zf.read(F))
     os.remove(update_zip)
 
 if Debug:
@@ -41,7 +41,7 @@ if build_info.json()['version'] != build_info_file['version']:
             f.write(download.content)
         update()
         logging.info("更新完成")
-        os._exit()
+        os._exit(0)
     except requests.RequestException as e:
         logging.error(f"无法下载更新文件: {e}")
         exit(1)

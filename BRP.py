@@ -1,15 +1,13 @@
 import logging
 import coloredlogs
 import requests
-from fake_useragent import UserAgent
 import datetime
 import pickle
 import os
 import json
-import getpass
 from MenuLite.Menu.api import PostAPI
+from login import sp_login
 
-logging.basicConfig(level=logging.INFO)
 coloredlogs.install(level="INFO", fmt="%(asctime)s - %(funcName)s: %(message)s")
 
 '''======-配置区-======'''
@@ -22,6 +20,7 @@ MAX_DAILY_TOTAL_REPORTS = 100  # 每天最多总举报次数
 class DailyReportLimiter:
     """每日举报次数限制器"""
     def __init__(self, limit_file="report_limit.pkl"):
+        self.today_count = None
         self.limit_file = limit_file
         self.today = datetime.date.today().isoformat()
         self.load_data()
@@ -30,8 +29,8 @@ class DailyReportLimiter:
         """加载历史数据"""
         try:
             if os.path.exists(self.limit_file):
-                with open(self.limit_file, 'rb') as f:
-                    data = pickle.load(f)
+                with open(self.limit_file, 'rb') as F:
+                    data = pickle.load(F)
                     # 检查是否是今天的数据
                     if data.get("date") == self.today:
                         self.today_count = data.get("count", 0)
@@ -39,18 +38,18 @@ class DailyReportLimiter:
                         self.today_count = 0
             else:
                 self.today_count = 0
-        except Exception as e:
-            logging.error(f"加载每日举报次数限制器数据时出错: {e}")
+        except Exception as E:
+            logging.error(f"加载每日举报次数限制器数据时出错: {E}")
             self.today_count = 0
     
     def save_data(self):
         """保存数据"""
         try:
             data = {"date": self.today, "count": self.today_count}
-            with open(self.limit_file, 'wb') as f:
-                pickle.dump(data, f)
-        except Exception as e:
-            logging.error(f"保存每日举报次数限制器数据时出错: {e}")
+            with open(self.limit_file, 'wb') as F:
+                pickle.dump(data, F)
+        except Exception as E:
+            logging.error(f"保存每日举报次数限制器数据时出错: {E}")
     
     def can_report(self):
         """检查是否还可以举报"""
@@ -99,44 +98,8 @@ if os.path.exists("login.json"):
         os.remove("login.json")
         login_user_name = None
 else:
-    logging.info("登录到Codemao Network以使用SenseiPlus")
-    logging.info("请输入您的用户名/手机号")
-    identity = input()
-    logging.info("请输入您的密码")
-    password = getpass.getpass()
-    try:
-        login_response = requests.post(
-            url="https://api.codemao.cn/tiger/v3/web/accounts/login",
-            headers={
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept-Language": "zh-CN,zh;q=0.9",
-                "Connection": "keep-alive",
-                "Content-Type": "application/json",
-                "User-Agent": UserAgent().random,
-            },
-            json={
-            "pid": "65edCTyg",
-            "identity": identity,
-            "password": password
-            }
-        )
-    except requests.RequestException as e:
-        logging.error(f"登录请求失败: {e}")
-        exit(1)
-
-    logging.info(f"登录响应状态码: {login_response.status_code}")
-    logging.info(f"登录响应内容: {login_response.text}")
-    try:
-        login_user_id = login_response.json()['user_info']['id']
-    except KeyError:
-        logging.error("登录响应中没有找到用户信息")
-        exit(1)
-
-    logging.info(f"登录成功，用户ID: {login_user_id}")
-    # 将用户登录信息写入login.json
-    with open("login.json", "w", encoding="utf-8") as f:
-        f.write(login_response.text)
+    logging.info("登录到Codemao Network以使用此功能")
+    sp_login()
 
 logging.info("请输入要举报的帖子标题")
 title = input()

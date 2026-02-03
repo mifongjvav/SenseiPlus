@@ -7,13 +7,12 @@ import random
 import string
 import shared_data
 import sys
-import getpass
 import time
 import subprocess
-from fake_useragent import UserAgent
 from init_checks import perform_all_checks
 from MenuLite.MlMain import set_condition_var
 from MenuLite.Menu.api import GetAPI
+from login import sp_login
 
 Debug = True
 
@@ -36,7 +35,7 @@ try:
 except FileNotFoundError:
     pass
 except PermissionError:
-    restaeted = True
+    restarted = True
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -107,45 +106,7 @@ if os.path.exists("login.json"):
         login_user_name = None
 else:
     logging.info("登录到Codemao Network以使用SenseiPlus")
-    logging.info("请输入您的用户名/手机号")
-    identity = input()
-    logging.info("请输入您的密码")
-    password = getpass.getpass()
-    try:
-        login_response = requests.post(
-            url="https://api.codemao.cn/tiger/v3/web/accounts/login",
-            headers={
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept-Language": "zh-CN,zh;q=0.9",
-                "Connection": "keep-alive",
-                "Content-Type": "application/json",
-                "User-Agent": UserAgent().random,
-            },
-            json={
-            "pid": "65edCTyg",
-            "identity": identity,
-            "password": password
-            }
-        )
-    except requests.RequestException as e:
-        logging.error(f"登录请求失败: {e}")
-        exit(1)
-
-    logging.info(f"登录响应状态码: {login_response.status_code}")
-    logging.info(f"登录响应内容: {login_response.text}")
-    try:
-        login_user_id = login_response.json()['user_info']['id']
-        login_user_name = login_response.json()['user_info']['nickname']
-        login_token = login_response.json()['auth']['token']
-    except KeyError:
-        logging.error("登录响应中没有找到用户信息")
-        exit(1)
-
-    logging.info(f"登录成功，用户ID: {login_user_id}")
-    # 将用户登录信息写入login.json
-    with open("login.json", "w", encoding="utf-8") as f:
-        f.write(login_response.text)
+    sp_login()
 logging.info(f"欢迎回家，{login_user_name}")
 messages = GetAPI('/web/message-record/count', login_token)
 messages = messages.json()
@@ -161,34 +122,34 @@ if counts[0] > 0 or counts[1] > 0 or counts[2] > 0:
     logging.info(f"新系统通知数量: {counts[2]} 个")
 
 # 记录登录时间的文件路径
-LOGIN_TIME_FILE = "logintime.json"
+LOGIN_TIME_FILE = "login_time.json"
 
 # 获取当前时间戳
 current_time = time.time()
 
-# 如果存在 logintime.json 文件
+# 如果存在 login_time.json 文件
 if os.path.exists(LOGIN_TIME_FILE):
     try:
         with open(LOGIN_TIME_FILE, "r", encoding="utf-8") as f:
             login_time_data = json.load(f)
             
-        # 检查是否有 logintime 键
-        if "logintime" in login_time_data:
-            last_login_time = login_time_data["logintime"]
+        # 检查是否有 login_time 键
+        if "login_time" in login_time_data:
+            last_login_time = login_time_data["login_time"]
             time_diff_hours = (current_time - last_login_time) / 3600
             
             # 如果时间差大于72小时
             if time_diff_hours > 72:
                 logging.warning("为防止用户信息更改，SenseiPlus推荐你每72小时重新登录一次")
     except (json.JSONDecodeError, KeyError) as e:
-        logging.debug(f"logintime.json 文件读取错误: {e}")
+        logging.debug(f"login_time.json 文件读取错误: {e}")
         # 文件损坏，创建新的
         pass
 
 # 无论是否存在文件，都更新当前登录时间
 try:
     with open(LOGIN_TIME_FILE, "w", encoding="utf-8") as f:
-        json.dump({"logintime": current_time}, f)
+        json.dump({"login_time": current_time}, f)
 except Exception as e:
     logging.debug(f"写入登录时间失败: {e}")
 
@@ -213,9 +174,9 @@ else:
     shared_data.restricted = False
     set_condition_var("restricted", False)
     response = requests.get(f'https://api.codemao.cn/creation-tools/v1/user/center/work-list?user_id={user_id}&offset=0&limit=4999')
-    workids = json.loads(response.text)
+    work_ids = json.loads(response.text)
     try:
-        shared_data.ids = [item['id'] for item in workids['items']]  # 存储到共享模块
+        shared_data.ids = [item['id'] for item in work_ids['items']]  # 存储到共享模块
     except KeyError:
         logging.error("此用户ID不存在或该用户没有作品")
         sys.exit(1)
