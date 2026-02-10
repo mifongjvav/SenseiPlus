@@ -153,7 +153,6 @@ try:
 except Exception as e:
     logging.debug(f"写入登录时间失败: {e}")
 
-
 logging.info("请输入对方的用户ID，输入0退出，输入1使用受限模式:")
 try:
     user_id = input()

@@ -48,58 +48,76 @@ except ImportError:
     logging.info("pip install CodemaoEDUTools")
     os._exit(1)
 
-ids = shared_data.ids
-
 threads = []
 
 class Func:
     @staticmethod
     def ReportAllWorks():
+        ids = shared_data.ids
         logging.info("开始举报作品（多线程）")
+
         for work_id in ids:
-            thread = threading.Thread(
+            t = threading.Thread(
                 target=CodemaoEDUTools.ReportWork,
                 args=('./tokens.txt', work_id, '违法违规', '1')
             )
-            threads.append(thread)
-            thread.start()
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
+        logging.info("所有作品举报完成")
 
     @staticmethod
     def LikeAllWorks():
+        ids = shared_data.ids
         logging.info("开始点赞作品（多线程）")
         for work_id in ids:
-            thread = threading.Thread(
+            t = threading.Thread(
                 target=CodemaoEDUTools.LikeWork,
                 args=('./tokens.txt', work_id)
             )
-            threads.append(thread)
-            thread.start()
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
+        logging.info("所有作品点赞完成")
 
     @staticmethod
     def CollectAllWorks():
+        ids = shared_data.ids
         logging.info("开始收藏作品（多线程）")
         for work_id in ids:
-            thread = threading.Thread(
+            t = threading.Thread(
                 target=CodemaoEDUTools.CollectionWork,
                 args=('./tokens.txt', work_id)
             )
-            threads.append(thread)
-            thread.start()
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
+        logging.info("所有作品收藏完成")
 
     @staticmethod
     def ReviewAllWorks():
+        ids = shared_data.ids
+        logging.info('评论啥')
+        send_text = input()
         logging.info("开始评论作品（多线程）")
         for work_id in ids:
-            thread = threading.Thread(
+            t = threading.Thread(
                 target=CodemaoEDUTools.SendReviewToWork,
-                args=('./tokens.txt', work_id, '这是一条评论')
+                args=('./tokens.txt', work_id, send_text)
             )
-            threads.append(thread)
-            thread.start()
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
+        logging.info("所有作品评论完成")
 
     @staticmethod
     def ViewAllWorks():
-        logging.info("开始浏览所有作品（多线程）")
+        ids = shared_data.ids
+        logging.info("开始浏览所有作品")
         for work_id in ids:
             CodemaoEDUTools.ViewWork('./tokens.txt', work_id)
 
@@ -293,7 +311,7 @@ class Func:
             
             logging.info(f"{type_name}消息获取完成")
     @staticmethod
-    def     PublishCustomCoCoWork():
+    def PublishCustomCoCoWork():
         with open('login.json', 'r', encoding='utf-8') as f:
             login_data = json.load(f)
         token = login_data['auth']['token']
