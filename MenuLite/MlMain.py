@@ -1,16 +1,20 @@
-import logging
-import json
-import os
+from logging import error, info
+from json import load
+from os import path, _exit
+
 import shared_data
-from MenuLite.Menu.MenuFunc import *  # noqa: F403
+from shared_data import condition_vars
+from sys import exit, argv, executable
+from subprocess import run
+from MenuLite.Menu.MenuFunc import * # noqa
 
 # 获取当前脚本所在目录
-script_dir = os.path.dirname(os.path.abspath(__file__))
+script_dir = path.dirname(path.abspath(__file__))
 # 构建配置文件的绝对路径
-config_path = os.path.join(script_dir, './Menu/MlConfig.json')
+config_path = path.join(script_dir, './Menu/MlConfig.json')
 
 with open(config_path, encoding='utf-8') as file:
-    config = json.load(file)
+    config = load(file)
 
 menu_items = config["menu_items"]
 
@@ -20,7 +24,7 @@ def check_conditions(conditions):
         return True, None
     
     for key, required_value in conditions.items():
-        current_value = shared_data.condition_vars.get(key)
+        current_value = condition_vars.get(key)
         if current_value != required_value:
             return False, {key: required_value}
     
@@ -38,20 +42,24 @@ def ml_main_menu():
         
         # 只显示条件满足的菜单项
         if conditions_met:
-            logging.info(f"{key}. {item_name}")
+            info(f"{key}. {item_name}")
     
-    logging.info("x. 退出")
+    info("x. 退出")
+    info("re. 重启")
 
 def ml_input():
     while True:
         try:
             ml_main_menu()
-            logging.info("请输入菜单项: ")
+            info("请输入菜单项: ")
             user_input = input().strip()
             
             if user_input == 'x':
-                logging.info("退出程序")
-                os._exit(0)
+                info("退出程序")
+                _exit(0)
+            elif user_input == 're':
+                run([executable] + argv + ["--restart"])
+                exit(0)
             
             # 检查输入的键是否存在于menu_items中
             if user_input in menu_items:
@@ -65,10 +73,10 @@ def ml_input():
                 
                 if not conditions_met:
                     failed_key, required_value = next(iter(failed_condition.items()))
-                    current_value = shared_data.condition_vars.get(failed_key, "未设置")
-                    logging.error(f"功能 '{item_name}' 受到限制")
-                    logging.error(f"条件不满足: {failed_key} 需要为 '{required_value}'，当前为 '{current_value}'")
-                    logging.info("请先满足条件后再使用此功能")
+                    current_value = condition_vars.get(failed_key, "未设置")
+                    error(f"功能 '{item_name}' 受到限制")
+                    error(f"条件不满足: {failed_key} 需要为 '{required_value}'，当前为 '{current_value}'")
+                    info("请先满足条件后再使用此功能")
                     continue
                 
                 # 获取对应的函数对象
@@ -76,27 +84,27 @@ def ml_input():
                 
                 if func and callable(func):
                     # 调用函数
-                    logging.info(f"执行功能: {item_name}")
+                    info(f"执行功能: {item_name}")
                     func()
                 else:
-                    logging.error(f"函数 {func_name} 不存在或不可调用")
+                    error(f"函数 {func_name} 不存在或不可调用")
             else:
-                logging.error(f"无效的键: {user_input}")
+                error(f"无效的键: {user_input}")
         except KeyboardInterrupt:
-            logging.info("\n用户中断操作")
-            os._exit(0)
+            info("\n用户中断操作")
+            _exit(0)
         except Exception as e:
-            logging.error(f"发生错误: {str(e)}")
+            error(f"发生错误: {str(e)}")
 
 def set_condition_var(key, value):
     """设置条件变量（可以在其他模块中调用）"""
-    shared_data.condition_vars[key] = value
+    condition_vars[key] = value
 
 def show_condition_vars():
     """显示当前所有条件变量"""
-    logging.info("当前条件变量状态:")
-    for key, value in shared_data.condition_vars.items():
-        logging.info(f"  {key}: {value}")
+    info("当前条件变量状态:")
+    for key, value in condition_vars.items():
+        info(f"  {key}: {value}")
 
 # 防止重复执行的主程序入口
 if __name__ == "__main__":

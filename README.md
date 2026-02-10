@@ -6,7 +6,7 @@
 
 请在开始使用前运行以下命令安装依赖，文件内不包含CET的依赖，您需要手动安装CET的依赖
 
-```python
+```bash
 pip install -r requirements.txt
 ```
 

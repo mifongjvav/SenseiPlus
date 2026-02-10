@@ -4,13 +4,13 @@ from datetime import datetime, timezone, timedelta
 
 owner = "mifongjvav"
 repo = "SenseiPlus"
-version = "2.0.0"
+version = "3.0.0b"
 
-def get_latest_commit_sha(owner, repo, short=True, branch=None):
+def get_latest_commit_sha(owner_func, repo_func, short=True, branch=None):
     if branch:
-        url = f"https://api.github.com/repos/{owner}/{repo}/commits/{branch}"
+        url = f"https://api.github.com/repos/{owner_func}/{repo_func}/commits/{branch}"
     else:
-        url = f"https://api.github.com/repos/{owner}/{repo}/commits"
+        url = f"https://api.github.com/repos/{owner_func}/{repo_func}/commits"
     
     response = requests.get(url, verify=False)
     response.raise_for_status()
