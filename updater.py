@@ -3,6 +3,7 @@ import os
 import requests
 import logging
 import json
+import shared_data
 from Main import Debug
 
 def update():
@@ -30,10 +31,9 @@ build_info = requests.get(f'https://raw.githubusercontent.com/mifongjvav/SenseiP
 
 with open('build_info.json', 'r', encoding='utf-8') as f:
     build_info_file = json.load(f)
-
 if build_info.json()['version'] != build_info_file['version']:
     logging.info(f"有新的版本 {build_info.json()['version']} 可用，正在下载更新...")
-    
+
     try:
         download = requests.get(f'https://github.com/mifongjvav/SenseiPlus/archive/refs/heads/{branch}.zip', verify=False)
         # 保存下载的文件
