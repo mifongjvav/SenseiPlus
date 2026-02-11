@@ -14,7 +14,7 @@ from MenuLite.MlMain import set_condition_var
 from MenuLite.Menu.api import GetAPI
 from login import sp_login
 
-Debug = True
+Debug = False
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
