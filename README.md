@@ -4,10 +4,20 @@
 
 ## 如何使用？
 
-请在开始使用前运行以下命令安装依赖，文件内不包含CET的依赖，您需要手动安装CET的依赖
+请在开始使用前运行以下命令安装依赖：
 
 ```bash
 pip install -r requirements.txt
+```
+
+## 使用Nuitka构建成exe
+
+请使用以下命令构建
+
+注意：第一次构建可能非常慢，因为CodemaoEDUTools使用了Pandas库
+
+```bash
+nuitka --standalone --jobs=auto --follow-imports --include-package=CodemaoEDUTools --include-package-data=fake_useragent --include-data-file=MenuLite/Menu/MlConfig.json=MenuLite/Menu/MlConfig.json --include-data-file=build_info.json=build_info.json --output-dir=dist --output-filename=SenseiPlus Main.py
 ```
 
 ## 免责声明

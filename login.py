@@ -2,6 +2,9 @@ import logging
 import getpass
 import coloredlogs
 import requests
+import json
+import os
+import shared_data
 from fake_useragent import UserAgent
 coloredlogs.install(level="INFO", fmt="%(asctime)s - %(funcName)s: %(message)s")
 
@@ -43,3 +46,14 @@ def sp_login():
     # 将用户登录信息写入login.json
     with open("login.json", "w", encoding="utf-8") as f:
         f.write(login_response.text)
+def sp_login_json():
+    try:
+        with open("login.json", "r", encoding="utf-8") as f:
+            login_data = json.load(f)
+            shared_data.login_user_name = login_data['user_info']['nickname']
+            shared_data.login_token = login_data['auth']['token']
+    except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
+        logging.warning(f"login.json 文件损坏或格式错误: {e}")
+        # 删除损坏的文件，重新登录
+        os.remove("login.json")
+        shared_data.login_user_name = None

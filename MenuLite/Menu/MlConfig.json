@@ -52,7 +52,10 @@
             "name": "发评论并置顶"
         },
         "更新": {
-            "name": "检查更新"
+            "name": "检查更新",
+            "conditions": {
+                "is_nuitka": false
+            }
         },
         "退出登录": {
             "name": "退出登录"
