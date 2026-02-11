@@ -14,7 +14,7 @@ from MenuLite.MlMain import set_condition_var
 from MenuLite.Menu.api import GetAPI
 from login import sp_login, sp_login_json
 
-Debug = True
+Debug = False
 
 if "__compiled__" in globals():
     shared_data.is_nuitka = True
